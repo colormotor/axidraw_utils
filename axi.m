@@ -1,0 +1,56 @@
+function axi(cmd, data, address, port)
+    if nargin < 4
+        port = 9999;
+    end
+    if nargin < 3
+        address = '127.0.0.1';
+    end
+
+    t = tcpip(address, port);
+    t.OutputBufferSize = 50000; 
+    fopen(t);
+    
+    try
+        if strcmp(cmd,'pen')
+            if data > 0
+                fprintf(t, 'PATHCMD pen_down');
+            else
+                fprintf(t, 'PATHCMD pen_up');
+            end
+        elseif strcmp(cmd,'draw') || strcmp(cmd,'draw_raw')
+            display('drawing');
+            fprintf(t, 'PATHCMD drawing_start');
+            if iscell(data)
+                for i=1:size(data,2)
+                    send_path(t, data{i});
+                end
+            else
+                send_path(t, data);
+            end
+            if strcmp(cmd,'draw')
+                fprintf(t, 'PATHCMD drawing_end');
+            else
+                fprintf(t, 'PATHCMD drawing_end_raw');
+            end
+        else
+        end 
+    catch ME
+        getReport(ME)
+        display('error, closing connection\n');
+    end
+    
+    echotcpip('off')
+    fclose(t);
+    delete(t);
+    clear t;
+    
+end
+
+function send_path(t, P)
+    n = size(P,2);
+    x = reshape(P, 1, n*2);
+    str = mat2str(x);
+    str = str(2:end-1); % remove trailing brackets
+    str = sprintf('PATHCMD stroke %d %s', n, str)
+    fprintf(t, str);
+end
