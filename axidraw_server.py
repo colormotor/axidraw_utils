@@ -20,10 +20,15 @@ args.add_argument('--nx', type=int, default=1,
                  help='''Number of horizontal subdivisions for test plots''')
 args.add_argument('--ny', type=int, default=1, 
                  help='''Number of vertical subdivisions for test plots''')
-args.add_argument('--padding', type=float, default=0.1, 
+args.add_argument('--padding', type=float, default=0.2, 
                  help='''Padding in inches for subdivided drawing''')
 args.add_argument('--size', type=float, default=8.5, 
                  help='''Reference work area size in inches''')
+args.add_argument('--y_up', type=bool, default=False, 
+                 help='''If true this indicates that the input drawing has origin in the bottom left''')
+args.add_argument('--start_index', type=int, default=0, 
+                 help='''Default start index''')
+
 
 
 cfg = args.parse_args()
@@ -89,6 +94,9 @@ def nextpos():
         if(POSY == NY):
             POSY = 0
 
+for i in range(cfg.start_index):
+    nextpos()
+
 def goodbuf(buf): 
    if not buf: return False
    if buf[0] == 0xff: return False
@@ -119,6 +127,12 @@ def recv(connection):
 
 curpath = []
 paths = []
+title = ''
+
+def set_title(txt):
+    global title
+    print('Setting title: ' + txt)
+    title = txt
 
 def stroke_start():
     global curpath
@@ -137,18 +151,33 @@ def drawing_start():
     print("DRAWING START")
     global paths
     paths = []
-
+    
 # DB: Note, addition here. We want to be able to draw with specific coordinates (in inches)
 # which can be done by using the "drawing_end_raw" command
 def drawing_end(raw=False):
     global paths
+    global title
     d = axi.Drawing(paths)
+    text_pos = (PADDING, V3_SIZEX-PADDING)
     if not raw:
-        d = d.scale(1.0, -1.0)
+        if cfg.y_up:
+            d = d.scale(1.0, -1.0)
         d = d.scale_to_fit(CELLSIZEX, CELLSIZEY, PADDING)
         d = d.translate(POSX*CELLSIZEX,  POSY*CELLSIZEY)
+        text_pos = (POSX*CELLSIZEX, (POSY+1)*CELLSIZEY-PADDING)
         nextpos()
+        
+    if title:
+        font = axi.Font(axi.FUTURAL, 7.5) # 
+        dtext = font.text(title)
+        dtext 
+        dtext = dtext.translate(*text_pos)
+        d.add(dtext)
+
     axi.draw(d)
+    
+    title = '' # Reset title
+
     print("DRAWING END")
     print("")
 
@@ -183,6 +212,8 @@ def pathcmd(*ary):
     elif ary[1] == 'home':
         device.home()
         print('received home')
+    elif ary[1] == 'title':
+        set_title(' '.join(ary[2:]))
     else:
         print("strange PATHCMD: " + ary[1])
     
