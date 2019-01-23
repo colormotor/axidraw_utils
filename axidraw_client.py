@@ -1,6 +1,6 @@
-import socket
+import socket, sys
 import numpy as np
-
+import time
 
 def path_to_str(P):
     ''' Convert a path to a (num_points, point sequence) tuple
@@ -11,11 +11,11 @@ def path_to_str(P):
 
 
 class AxiDrawClient:
-    def __init__(self, address='localhost', port=9999):
+    def __init__(self, address='localhost', port=9999): #, blocking=False):
         self.address = address
         self.port = port
         self.socket_open = False
-        #self.open(address, port)
+        #self.blocking = blocking
 
     def open(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -23,10 +23,11 @@ class AxiDrawClient:
         print('connecting to %s port %s'%server_address)
         self.sock.connect(server_address)
         self.socket_open = True
-
+        
     def close(self):
         self.sock.close()
         self.socket_open = False
+
 
     def send(self, msg):
         auto_open = False
@@ -37,13 +38,18 @@ class AxiDrawClient:
         if auto_open:
             self.close()
 
+
     def sendln(self, msg):
         self.send(msg + '\n')
 
-    def drawing_start(self):
+
+    def drawing_start(self, title=''):
         self.open()
+        if title:
+            self.sendln('PATHCMD title ' + title)
         self.sendln('PATHCMD drawing_start')
-    
+
+
     def drawing_end(self, raw=False):
         if raw:
             self.drawing_end_raw()
@@ -52,25 +58,30 @@ class AxiDrawClient:
         self.sendln('PATHCMD drawing_end')
         self.close()
 
+
     def drawing_end_raw(self):
         self.sendln('PATHCMD drawing_end_raw')
         self.close()
 
 
-    def draw_paths(self, S, raw=False):
-        self.drawing_start()
+    def draw_paths(self, S, raw=False, title=''):
+        self.drawing_start(title)
         for P in S:
             self.add_path(P)
         self.drawing_end(raw)
 
+
     def add_path(self, P):
         self.sendln('PATHCMD stroke %d %s'%path_to_str(P))
+
 
     def pen_up(self):
         self.sendln('PATHCMD pen_up')
 
+
     def pen_down(self):
         self.sendln('PATHCMD pen_down')
+
 
     def home(self):
         self.sendln('PATHCMD home')
