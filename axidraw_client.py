@@ -9,6 +9,23 @@ def path_to_str(P):
         P = P.T
     return len(P), ' '.join(['%f %f'%(p[0], p[1]) for p in P])
 
+def recv_line(sock):
+    s = ''
+    while True:
+        off = s.find("\n")
+        if -1 != off: break
+        #print("reading more from connection")
+        buf = sock.recv(1024)
+        if not buf: return ''
+        if buf[0] == 0xff: return ''
+        if buf == '': return ''
+        buf = buf.decode("utf-8")   
+        s += buf
+    ret = s[0:off]
+    ret = ret.rstrip()
+    print('received ' + ret)
+    return ret
+
 
 class AxiDrawClient:
     def __init__(self, address='localhost', port=9999): #, blocking=False):
@@ -50,13 +67,14 @@ class AxiDrawClient:
         self.sendln('PATHCMD drawing_start')
 
 
-    def drawing_end(self, raw=False):
+    def drawing_end(self, raw=False, close=True):
         if raw:
             self.drawing_end_raw()
             return
 
         self.sendln('PATHCMD drawing_end')
-        self.close()
+        if close:
+            self.close()
 
 
     def drawing_end_raw(self):
@@ -64,12 +82,21 @@ class AxiDrawClient:
         self.close()
 
 
-    def draw_paths(self, S, raw=False, title=''):
+    def draw_paths(self, S, raw=False, title='', close=True):
         self.drawing_start(title)
         for P in S:
             self.add_path(P)
-        self.drawing_end(raw)
+        self.drawing_end(raw, close)
 
+    
+    def wait(self):
+        print('waiting')
+        self.sendln('wait')
+        rep = recv_line(self.sock)
+        if rep == 'done':
+            print('Finished waiting')
+            return True
+        return False
 
     def add_path(self, P):
         self.sendln('PATHCMD stroke %d %s'%path_to_str(P))

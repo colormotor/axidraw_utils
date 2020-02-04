@@ -14,7 +14,7 @@ import sys
 import argparse
 args = argparse.ArgumentParser(description='Axidraw server')
 
-args.add_argument('--port', type=int, default=9999, 
+args.add_argument('--port', type=int, default=80, 
                  help='''Server port number''')
 args.add_argument('--nx', type=int, default=1, 
                  help='''Number of horizontal subdivisions for test plots''')
@@ -254,6 +254,10 @@ while True:
         print(ary[0])
         if ary[0] == "PATHCMD":
             pathcmd(*ary)
+        elif ary[0] == 'wait':
+            device.wait()
+            resp = 'done\n'.encode('utf-8')
+            connection.send(resp)
         else:
             response = device.command(*ary)
             print("device response: " + response)
