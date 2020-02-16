@@ -70,15 +70,25 @@ to run the client on port 80 and localhost.
 
 
 ```
-client.draw_paths(S, title='TEST') 
+client.draw_paths(S, title='My Title') 
 ```
 
 Draws a list `S` of paths, with each path of N defined as a 2xN numpy array or a Nx2 list. Note that the server, will rescale the drawing to fit the specified work area size or subdivision, which is handy if one does not want to worry about the coordinate system in which the drawing is being generated. This can be overridden, by setting the `raw=True` flag
 ```
-client.draw_paths(S, raw=True, title='TEST') 
+client.draw_paths(S, raw=True, title='My Title') 
 ```
 In which case the coordinates must be specified in inches.
 
-Note that currently this requires [Numpy](https://numpy.org) to be installed.
+Another option is to send a `Drawing` instance of the [Axi](https://github.com/fogleman/axi) package. The package includes some really nice examples, and these can be easily adapted to the network setup by replacing calls to
+```
+axi.draw(...)
+```
+to 
+```
+client.draw(drawing)
+```
+with the optional `title` and `raw` paramters.
+
+Note that currently this class requires also [Numpy](https://numpy.org) to be installed.
 
 

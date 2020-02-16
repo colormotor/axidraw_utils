@@ -1,6 +1,7 @@
 import socket, sys
 import numpy as np
 import time
+import axi
 
 def path_to_str(P):
     ''' Convert a path to a (num_points, point sequence) tuple
@@ -88,7 +89,12 @@ class AxiDrawClient:
             self.add_path(P)
         self.drawing_end(raw, close)
 
-    
+    def draw(self, drawing, raw=False, title=''):
+        self.drawing_start(title)
+        for P in drawing.paths:
+            self.add_path(P)
+        self.drawing_end(raw)
+
     def wait(self):
         print('waiting')
         self.sendln('wait')
