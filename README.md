@@ -88,7 +88,8 @@ to
 client.draw(drawing)
 ```
 with the optional `title` and `raw` paramters.
+See `example_axi_lindenmayer.py` for an example. 
 
-Note that currently this class requires also [Numpy](https://numpy.org) to be installed.
+Note that currently the Python client requires also [Numpy](https://numpy.org) to be installed.
 
 
