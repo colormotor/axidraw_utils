@@ -2,7 +2,7 @@ function axi(cmd, data, address, port)
     precision = 4;
     
     if nargin < 4
-        port = 9999;
+        port = 80;
     end
     if nargin < 3
         address = '127.0.0.1';
