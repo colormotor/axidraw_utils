@@ -55,26 +55,9 @@ client = AxiDrawClient(address=server_addr, port=80)
 # Simple send a list of paths and close connection
 client.draw_paths(S, title='TEST') #'d=%.2f da=%.2f db=%.2f'%(delta, da, db))
 
+# Use the following to draw a set of paths with matplotlib
+client.visualize_paths(S, title='TEST')
 
-
-
-# Alternative, send paths and block until all paths have been drawn
-# This can be useful for external interactions with the plotter
-# client.draw_paths(S, title='TEST', close=False) #'d=%.2f da=%.2f db=%.2f'%(delta, da, db))
-# res = client.wait()
-# print('done plotting')
-# client.close()
-
-#######################################
-
-# plot figure
-plt.figure(figsize=(5,5))
-for P in S:
-    plt.plot(P[0,:], P[1,:], 'k', linewidth=0.5)
-plt.axis('equal')
-plt.axis('off')
-plt.gca().invert_yaxis()
-plt.show()
 
 
 

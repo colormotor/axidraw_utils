@@ -85,10 +85,20 @@ axi.draw(...)
 ```
 to 
 ```
-client.draw(drawing)
+client.drawing(drawing)
 ```
 with the optional `title` and `raw` paramters.
 See `example_axi_lindenmayer.py` for an example. 
+
+To plot either a list of paths or a drawing, use the commands 
+```
+client.visualize_paths(S, title='MyTitle')
+```
+and 
+```
+client.visualize_drawing(drawing, title='MyTitle')
+```
+respectively.
 
 Note that currently the Python client requires also [Numpy](https://numpy.org) to be installed.
 

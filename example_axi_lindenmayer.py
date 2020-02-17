@@ -22,8 +22,11 @@ def main():
     # d.render(bounds=axi.V3_BOUNDS).write_to_png('out.png')
 
     client = AxiDrawClient(address='localhost', port=80)
-    client.draw(d)
-
+    # Comment the following if plotter is disconnected
+    client.drawing(d)
+    
+    client.visualize_drawing(d, title='TEST')
+    
 if __name__ == '__main__':
     main()
 
