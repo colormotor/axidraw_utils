@@ -1,7 +1,6 @@
 import socket, sys
 import numpy as np
 import time
-import axi
 
 def path_to_str(P):
     ''' Convert a path to a (num_points, point sequence) tuple
@@ -56,7 +55,6 @@ class AxiDrawClient:
         if auto_open:
             self.close()
 
-
     def sendln(self, msg):
         self.send(msg + '\n')
 
@@ -68,7 +66,7 @@ class AxiDrawClient:
         self.sendln('PATHCMD drawing_start')
 
 
-    def drawing_end(self, raw=False, close=True):
+    def drawing_end(self, raw=False, close=False):
         if raw:
             self.drawing_end_raw()
             return
@@ -82,18 +80,60 @@ class AxiDrawClient:
         self.sendln('PATHCMD drawing_end_raw')
         self.close()
 
+    def draw_paths(self, S, raw=False, title='', close=False):
+        try:
+            self.drawing_start(title)
+            for P in S:
+                self.add_path(P)
+            self.drawing_end(raw, close)
+            
+        except ConnectionRefusedError as e: 
+            print('could not connect to network')
+            print(e)
 
-    def draw_paths(self, S, raw=False, title='', close=True):
-        self.drawing_start(title)
-        for P in S:
-            self.add_path(P)
-        self.drawing_end(raw, close)
-
-    def draw(self, drawing, raw=False, title=''):
-        self.drawing_start(title)
+    def drawing(self, drawing, raw=False, title=''):
+        try:
+            self.drawing_start(title)
+            for P in drawing.paths:
+                self.add_path(P)
+            self.drawing_end(raw)
+        except ConnectionRefusedError as e: 
+            print('could not connect to network')
+            print(e)
+            
+    def visualize_drawing(self, drawing, title='', close=False, figsize=(7,7), axis=False):
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=figsize)
+        if title:
+            plt.title(title)
         for P in drawing.paths:
-            self.add_path(P)
-        self.drawing_end(raw)
+            plt.plot([p[0] for p in P],
+                     [p[1] for p in P], 'k', linewidth=0.5)
+        plt.axis('equal')
+        if not axis:
+            plt.axis('off')
+        plt.gca().invert_yaxis()
+        plt.show()
+
+    def visualize_paths(self, S, title='', close=False, figsize=(7,7), axis=False):
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=figsize)
+        if title:
+            plt.title(title)
+        if type(S) != list:
+            S = [S]
+        for P in S:
+            if type(P) == np.ndarray:
+                P = list(P.T)
+            if close:
+                P = P + [P[0]]
+            plt.plot([p[0] for p in P],
+                     [p[1] for p in P], 'k', linewidth=0.5)
+        plt.axis('equal')
+        if not axis:
+            plt.axis('off')
+        plt.gca().invert_yaxis()
+        plt.show()
 
     def wait(self):
         print('waiting')
