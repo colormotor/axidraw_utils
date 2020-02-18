@@ -8,7 +8,7 @@ def main():
         'A': 'A-B--B+A++AA+B-',
         'B': '+A-BB--B-A++A+B',
     })
-    d = system.run('A', 5, 60)
+    d = system.run('A', 3, 60)
     # system = axi.LSystem({
     #     'X': 'F-[[X]+X]+F[+FX]-X',
     #     'F': 'FF',
